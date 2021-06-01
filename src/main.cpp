@@ -1,11 +1,26 @@
 #include <Arduino.h>
 
-int ledPin = 0;  // LED connected to digital pin 13
-int inPin = 7;    // pushbutton connected to digital pin 7
-// int buttonPressed = 0;      // variable to store the read value
-int ledState = 0;
-int oldState = 0;
-int newState = 0;
+const int blueLEDPin = 13;
+int blueLEDState = 0;
+const int blueButtonPin = PIN_A2;
+int blueButtonState = 0;
+
+const int blueLEDPin = 12;
+int blueLEDState = 0;
+const int blueButtonPin = PIN_A3;
+int blueButtonState = 0;
+
+const int blueLEDPin = 11;
+int blueLEDState = 0;
+const int blueButtonPin = PIN_A4;
+int blueButtonState = 0;
+
+const int blueLEDPin = 10;
+int blueLEDState = 0;
+const int blueButtonPin = PIN_A5;
+int blueButtonState = 0;
+
+int piezoPin = 9;
 
 void setup() {
   DDRD = B11111111;
@@ -13,7 +28,7 @@ void setup() {
   // pinMode(inPin, INPUT);    // sets the digital pin 7 as input
 }
 
-void flashlight(){
+int flashlight(int inPin, int newState, int oldState, int ledState, int ledPin){
   newState = digitalRead(inPin);
 
   if(newState && newState != oldState){
@@ -22,7 +37,7 @@ void flashlight(){
     delay(100);
   }
 
-  oldState = newState;
+  return newState;
 
 }
 
