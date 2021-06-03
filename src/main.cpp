@@ -1,5 +1,6 @@
 #include <Arduino.h>
 /**
+🥺
 ⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠛⠛⠋⠉⠈⠉⠉⠉⠉⠛⠻⢿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⡿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⢿⣿⣿⣿⣿
 ⣿⣿⣿⣿⡏⣀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿
@@ -24,7 +25,7 @@
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠁⠀⠀⠹⣿⠃⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⢐⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⠿⠛⠉⠉⠁⠀⢻⣿⡇⠀⠀⠀⠀⠀⠀⢀⠈⣿⣿⡿⠉⠛⠛⠛⠉⠉
-⣿⡿⠋⠁⠀⠀⢀⣀⣠⡴⣸⣿⣇⡄⠀⠀⠀⠀⢀⡿⠄⠙⠛⠀⣀⣠⣤⣤⠄
+⣿⡿⠋⠁⠀⠀⢀⣀⣠⡴⣸⣿⣇⡄⠀⠀⠀⠀⢀⡿⠄⠙⠛⠀⣀⣠⣤⣤⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀
  **/
 //p12 on 74HC595
 const int latchPin = 3;
@@ -32,6 +33,8 @@ const int latchPin = 3;
 const int clockPin = 4;
 //p14 on 74HC595
 const int dataPin = 2;
+
+const int numOfLeds = 4;
 
 const int blueLEDPin = 9;
 int blueLEDState = 0;
@@ -52,6 +55,11 @@ const int redLEDPin = 6;
 int redLEDState = 0;
 const int redButtonPin = PIN_A5;
 int redButtonState = 0;
+
+const int maxArraySize = 50;
+int round = 0;
+int ledSequence[maxArraySize];
+int inputSequence[maxArraySize];
 
 int piezoPin = 11;
 
@@ -76,16 +84,18 @@ int flashlight(int inPin, int newState, int oldState, int ledState, int ledPin)
 	return newState;
 }
 
-//Takes hex number 0-F and returns binary string for displaying on 7 segment
+//Takes hex number 0-F and returns binary string for displaying on 7 segment (clears display on -1)
 int getSegmentString(int num)
 {
-
-	PORTD &= 0x00;
 	int returnString;
 
 	//case for display values 0-F
 	switch (num)
 	{
+	
+	case -1:
+		returnString = 0x00;
+		break;
 
 	case 0:
 		returnString = B11111010;
@@ -173,11 +183,40 @@ void displaySymbol(int num)
 	digitalWrite(latchPin, HIGH);
 }
 
+//turns on one of the LEDs 
+int randomLight() {
+	int ledToTurnOn = random(redLEDPin,blueLEDPin+1);
+	return ledToTurnOn;
+}
+
+void addToSequence(){
+	ledSequence[round] = randomLight();
+	round++;
+}
+
+// void getUserInput(){
+// 	int inputs = 0;
+// 	int buttonPressed;
+// 	while(inputs < round){
+// 		buttonPressed = PORT 
+// 	}
+// }
+
+//MAIN
 void loop()
 {
-	for (int i = 0; i < 16; ++i)
+	//used to randomize sequence each game
+	randomSeed(analogRead(A0));
+	displaySymbol(-1);
+	
+	for (int i = 0; i < 10; i++)
 	{
-		displaySymbol(i);
-		delay(1500);
+		addToSequence();
+		for(int j = 0; j < round; j++){
+			digitalWrite(ledSequence[j], HIGH);
+			delay(1000);
+			digitalWrite(ledSequence[j], LOW);
+		}
 	}
 }
+
