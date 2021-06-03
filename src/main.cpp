@@ -57,7 +57,7 @@ const int redButtonPin = PIN_A5;
 int redButtonState = 0;
 
 const int maxArraySize = 50;
-int round = 0;
+int roundNum = 0;
 int ledSequence[maxArraySize];
 int inputSequence[maxArraySize];
 
@@ -65,6 +65,10 @@ int piezoPin = 11;
 
 void setup()
 {
+	pinMode(blueLEDPin, OUTPUT);
+	pinMode(greenLEDPin, OUTPUT);
+	pinMode(yellowLEDPin, OUTPUT);
+	pinMode(redLEDPin, OUTPUT);
 	pinMode(latchPin, OUTPUT);
 	pinMode(clockPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
@@ -183,21 +187,16 @@ void displaySymbol(int num)
 	digitalWrite(latchPin, HIGH);
 }
 
-//turns on one of the LEDs 
-int randomLight() {
-	int ledToTurnOn = random(redLEDPin,blueLEDPin+1);
-	return ledToTurnOn;
-}
-
+//generates random LED to turn on
 void addToSequence(){
-	ledSequence[round] = randomLight();
-	round++;
+	ledSequence[roundNum] = random(redLEDPin,blueLEDPin+1);
+	roundNum++;
 }
 
 // void getUserInput(){
 // 	int inputs = 0;
 // 	int buttonPressed;
-// 	while(inputs < round){
+// 	while(inputs < roundNum){
 // 		buttonPressed = PORT 
 // 	}
 // }
@@ -212,11 +211,10 @@ void loop()
 	for (int i = 0; i < 10; i++)
 	{
 		addToSequence();
-		for(int j = 0; j < round; j++){
+		for(int j = 0; j < roundNum; j++){
 			digitalWrite(ledSequence[j], HIGH);
 			delay(1000);
 			digitalWrite(ledSequence[j], LOW);
 		}
 	}
 }
-
