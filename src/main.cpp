@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <math.h>
 /**
 🥺
 ⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠛⠛⠋⠉⠈⠉⠉⠉⠉⠛⠻⢿⣿⣿⣿⣿⣿⣿⣿
@@ -36,39 +37,51 @@ const int dataPin = 2;
 
 const int numOfLeds = 4;
 
-const int blueLEDPin = 9;
+const int blueLEDPin = 11;
 int blueLEDState = 0;
-const int blueButtonPin = PIN_A2;
+const int blueButtonPin = PIN_A0;
 int blueButtonState = 0;
 
-const int greenLEDPin = 8;
+const int greenLEDPin = 10;
 int greenLEDState = 0;
-const int greenButtonPin = PIN_A3;
+const int greenButtonPin = PIN_A1;
 int greenButtonState = 0;
 
-const int yellowLEDPin = 7;
+const int yellowLEDPin = 9;
 int yellowLEDState = 0;
-const int yellowButtonPin = PIN_A4;
+const int yellowButtonPin = PIN_A2;
 int yellowButtonState = 0;
 
-const int redLEDPin = 6;
+const int redLEDPin = 8;
 int redLEDState = 0;
-const int redButtonPin = PIN_A5;
+const int redButtonPin = PIN_A3;
 int redButtonState = 0;
 
 const int maxArraySize = 50;
 int roundNum = 0;
 int ledSequence[maxArraySize];
-int inputSequence[maxArraySize];
 
-int piezoPin = 11;
+int piezoPin = 6;
 
 void setup()
 {
+	Serial.begin(9600);
+
 	pinMode(blueLEDPin, OUTPUT);
 	pinMode(greenLEDPin, OUTPUT);
 	pinMode(yellowLEDPin, OUTPUT);
 	pinMode(redLEDPin, OUTPUT);
+
+	// digitalWrite(blueLEDPin, LOW);
+	// digitalWrite(greenLEDPin, LOW);
+	// digitalWrite(yellowLEDPin, LOW);
+	// digitalWrite(redLEDPin, LOW);
+
+	pinMode(blueButtonPin, INPUT);
+	pinMode(greenButtonPin, INPUT);
+	pinMode(yellowButtonPin, INPUT);
+	pinMode(redButtonPin, INPUT);
+
 	pinMode(latchPin, OUTPUT);
 	pinMode(clockPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
@@ -96,7 +109,7 @@ int getSegmentString(int num)
 	//case for display values 0-F
 	switch (num)
 	{
-	
+
 	case -1:
 		returnString = 0x00;
 		break;
@@ -176,7 +189,10 @@ int getSegmentString(int num)
 void displaySymbol(int num)
 {
 	//clears display
-	shiftOut(dataPin, clockPin, MSBFIRST, 0x00);
+	// digitalWrite(latchPin, LOW);
+	// shiftOut(dataPin, clockPin, MSBFIRST, 0x00);
+	// digitalWrite(latchPin, HIGH);
+	// delayMicroseconds(10);
 	//parallel data not being sent out
 	digitalWrite(latchPin, LOW);
 	//gets binary string to display symbol on 7-segment display
@@ -187,34 +203,65 @@ void displaySymbol(int num)
 	digitalWrite(latchPin, HIGH);
 }
 
-//generates random LED to turn on
-void addToSequence(){
-	ledSequence[roundNum] = random(redLEDPin,blueLEDPin+1);
+//generates random LED to turn on and adds it to existing sequence
+void addToSequence()
+{
+	ledSequence[roundNum] = random(redLEDPin, blueLEDPin + 1);
 	roundNum++;
 }
 
-// void getUserInput(){
-// 	int inputs = 0;
-// 	int buttonPressed;
-// 	while(inputs < roundNum){
-// 		buttonPressed = PORT 
-// 	}
-// }
+bool getUserInput()
+{
+	int inputs = 0;
+	int buttonPressed;
+	while (inputs < roundNum)
+	{
+		buttonPressed = PINC & 0xF;
+		if (buttonPressed == 0)
+		{
+			continue;
+		}
+		if (ledSequence[inputs] != (log10(buttonPressed) / log10(2) + redLEDPin))
+		{
+			Serial.println("Loser!");
+			return true;
+		}
+		delay(500);
+		inputs++;
+	}
+	Serial.println("Sequence Matched!");
+	return false;
+}
 
 //MAIN
 void loop()
 {
-	//used to randomize sequence each game
-	randomSeed(analogRead(A0));
+
 	displaySymbol(-1);
-	
-	for (int i = 0; i < 10; i++)
+	// //used to randomize sequence each game
+	randomSeed(analogRead(A4));
+	bool playerLost = false;
+
+	while (roundNum < maxArraySize && !playerLost)
 	{
 		addToSequence();
-		for(int j = 0; j < roundNum; j++){
-			digitalWrite(ledSequence[j], HIGH);
+		for (int i = 0; i < roundNum; i++)
+		{
+			digitalWrite(ledSequence[i], HIGH);
 			delay(1000);
-			digitalWrite(ledSequence[j], LOW);
+			digitalWrite(ledSequence[i], LOW);
 		}
+		playerLost = getUserInput();
+	}
+	if (roundNum == maxArraySize)
+	{
+		Serial.println("You won!");
+	}
+	else
+	{
+		Serial.println("You lost!");
+	}
+	for (;;)
+	{
 	}
 }
