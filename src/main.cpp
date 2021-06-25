@@ -1,33 +1,7 @@
 #include <Arduino.h>
 #include <math.h>
-/**
-🥺
-⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠛⠛⠋⠉⠈⠉⠉⠉⠉⠛⠻⢿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⡿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⢿⣿⣿⣿⣿
-⣿⣿⣿⣿⡏⣀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿
-⣿⣿⣿⢏⣴⣿⣷⠀⠀⠀⠀⠀⢾⣿⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿
-⣿⣿⣟⣾⣿⡟⠁⠀⠀⠀⠀⠀⢀⣾⣿⣿⣿⣿⣿⣷⢢⠀⠀⠀⠀⠀⠀⠀⢸⣿
-⣿⣿⣿⣿⣟⠀⡴⠄⠀⠀⠀⠀⠀⠀⠙⠻⣿⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⣿
-⣿⣿⣿⠟⠻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠶⢴⣿⣿⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⣿
-⣿⣁⡀⠀⠀⢰⢠⣦⠀⠀⠀⠀⠀⠀⠀⠀⢀⣼⣿⣿⣿⣿⣿⡄⠀⣴⣶⣿⡄⣿
-⣿⡋⠀⠀⠀⠎⢸⣿⡆⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⠗⢘⣿⣟⠛⠿⣼
-⣿⣿⠋⢀⡌⢰⣿⡿⢿⡀⠀⠀⠀⠀⠀⠙⠿⣿⣿⣿⣿⣿⡇⠀⢸⣿⣿⣧⢀⣼
-⣿⣿⣷⢻⠄⠘⠛⠋⠛⠃⠀⠀⠀⠀⠀⢿⣧⠈⠉⠙⠛⠋⠀⠀⠀⣿⣿⣿⣿⣿
-⣿⣿⣧⠀⠈⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠟⠀⠀⠀⠀⢀⢃⠀⠀⢸⣿⣿⣿⣿
-⣿⣿⡿⠀⠴⢗⣠⣤⣴⡶⠶⠖⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡸⠀⣿⣿⣿⣿
-⣿⣿⣿⡀⢠⣾⣿⠏⠀⠠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠉⠀⣿⣿⣿⣿
-⣿⣿⣿⣧⠈⢹⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿
-⣿⣿⣿⣿⡄⠈⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣦⣄⣀⣀⣀⣀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀⠙⣿⣿⡟⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠁⠀⠀⠹⣿⠃⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⢐⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⠿⠛⠉⠉⠁⠀⢻⣿⡇⠀⠀⠀⠀⠀⠀⢀⠈⣿⣿⡿⠉⠛⠛⠛⠉⠉
-⣿⡿⠋⠁⠀⠀⢀⣀⣠⡴⣸⣿⣇⡄⠀⠀⠀⠀⢀⡿⠄⠙⠛⠀⣀⣠⣤⣤⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀
- **/
+#include <pitches.h>
+
 //p12 on 74HC595
 const int latchPin = 3;
 //p11 on 74HC595
@@ -38,30 +12,26 @@ const int dataPin = 2;
 const int numOfLeds = 4;
 
 const int blueLEDPin = 11;
-int blueLEDState = 0;
 const int blueButtonPin = PIN_A0;
-int blueButtonState = 0;
 
 const int greenLEDPin = 10;
-int greenLEDState = 0;
 const int greenButtonPin = PIN_A1;
-int greenButtonState = 0;
 
 const int yellowLEDPin = 9;
-int yellowLEDState = 0;
 const int yellowButtonPin = PIN_A2;
-int yellowButtonState = 0;
 
 const int redLEDPin = 8;
-int redLEDState = 0;
 const int redButtonPin = PIN_A3;
-int redButtonState = 0;
 
 const int maxArraySize = 50;
-int roundNum = 0;
+int level = 0;
 int ledSequence[maxArraySize];
 
-int piezoPin = 6;
+int piezoPin = 7;
+
+// notes in the melody:
+int ledNotes[] = {
+	NOTE_B3, NOTE_G3, NOTE_E3, NOTE_C3};
 
 void setup()
 {
@@ -71,11 +41,6 @@ void setup()
 	pinMode(greenLEDPin, OUTPUT);
 	pinMode(yellowLEDPin, OUTPUT);
 	pinMode(redLEDPin, OUTPUT);
-
-	// digitalWrite(blueLEDPin, LOW);
-	// digitalWrite(greenLEDPin, LOW);
-	// digitalWrite(yellowLEDPin, LOW);
-	// digitalWrite(redLEDPin, LOW);
 
 	pinMode(blueButtonPin, INPUT);
 	pinMode(greenButtonPin, INPUT);
@@ -87,21 +52,7 @@ void setup()
 	pinMode(dataPin, OUTPUT);
 }
 
-int flashlight(int inPin, int newState, int oldState, int ledState, int ledPin)
-{
-	newState = digitalRead(inPin);
-
-	if (newState && newState != oldState)
-	{
-		ledState = !ledState;
-		digitalWrite(ledPin, ledState);
-		delay(100);
-	}
-
-	return newState;
-}
-
-//Takes hex number 0-F and returns binary string for displaying on 7 segment (clears display on -1)
+//Takes hex number 0-F and returns binary string for displaying on 7 segment
 int getSegmentString(int num)
 {
 	int returnString;
@@ -109,11 +60,6 @@ int getSegmentString(int num)
 	//case for display values 0-F
 	switch (num)
 	{
-
-	case -1:
-		returnString = 0x00;
-		break;
-
 	case 0:
 		returnString = B11111010;
 		break;
@@ -186,50 +132,85 @@ int getSegmentString(int num)
 	return returnString;
 }
 
-void displaySymbol(int num)
+void displaySymbol(int segmentString)
 {
-	//clears display
-	// digitalWrite(latchPin, LOW);
-	// shiftOut(dataPin, clockPin, MSBFIRST, 0x00);
-	// digitalWrite(latchPin, HIGH);
-	// delayMicroseconds(10);
-	//parallel data not being sent out
 	digitalWrite(latchPin, LOW);
-	//gets binary string to display symbol on 7-segment display
-	int segmentString = getSegmentString(num);
 	//shifts out the bits of segmentString to the register, starting with the most significant bit
 	shiftOut(dataPin, clockPin, MSBFIRST, segmentString);
 	//parallel data sent to 7-segment display
 	digitalWrite(latchPin, HIGH);
+	delayMicroseconds(100);
+}
+
+//displays score on the 7 segment display
+//function extracts the digits num from right to left then calls itself recursively to display the digits, so the digits are displayed left to right
+void displayScore(int num)
+{
+	//q stands for quotient and r stands for remainder
+	int q, r;
+	int absNum = abs(num);
+
+	//moves decimal place of temp one to the left
+	q = absNum / 10;
+	//extracts digit in one's place
+	r = absNum % 10;
+
+	//if q is bigger than 0, then there are still more digits that need to be extracted
+	if (q > 0)
+	{
+		//function called recursively, keeping r on the stack to display later
+		displayScore(q);
+	}
+	//once q is not larger than 0, all the digits have been extracted and can now be displayed starting with the most significant digit
+	displaySymbol(getSegmentString(r));
+	//digit is displayed for 0.5 seconds
+	delay(500);
+	//display is cleared for 0.1 seconds before displaying subsequent digits or exiting function entirely
+	displaySymbol(0);
+	delay(100);
+}
+
+void flashLED(int led, int onTime)
+{
+	digitalWrite(led, HIGH);
+	tone(piezoPin,ledNotes[led-redLEDPin]);
+	delay(onTime);
+	noTone(piezoPin);
+	digitalWrite(led, LOW);
+	delay(50);
 }
 
 //generates random LED to turn on and adds it to existing sequence
 void addToSequence()
 {
-	ledSequence[roundNum] = random(redLEDPin, blueLEDPin + 1);
-	roundNum++;
+	ledSequence[level] = random(redLEDPin, blueLEDPin + 1);
+	level++;
 }
 
 bool getUserInput()
 {
 	int inputs = 0;
 	int buttonPressed;
-	while (inputs < roundNum)
+	int buttonToLED;
+	while (inputs < level)
 	{
 		buttonPressed = PINC & 0xF;
+		buttonToLED = log10(buttonPressed) / log10(2) + redLEDPin;
+
 		if (buttonPressed == 0)
 		{
 			continue;
 		}
-		if (ledSequence[inputs] != (log10(buttonPressed) / log10(2) + redLEDPin))
+		if (ledSequence[inputs] != buttonToLED)
 		{
 			Serial.println("Loser!");
 			return true;
 		}
-		delay(500);
+		flashLED(buttonToLED,500);
 		inputs++;
 	}
 	Serial.println("Sequence Matched!");
+	delay(100);
 	return false;
 }
 
@@ -237,23 +218,26 @@ bool getUserInput()
 void loop()
 {
 
-	displaySymbol(-1);
-	// //used to randomize sequence each game
+	// for(int i = 3; i >= 0; i--){
+	// 	tone(piezoPin,ledNotes[i],250);
+	// 	delay(250*1.3);
+	// 	noTone(piezoPin);
+	// }
+	//used to randomize sequence each game
 	randomSeed(analogRead(A4));
 	bool playerLost = false;
 
-	while (roundNum < maxArraySize && !playerLost)
+	while (level < maxArraySize && !playerLost)
 	{
 		addToSequence();
-		for (int i = 0; i < roundNum; i++)
+		for (int i = 0; i < level; i++)
 		{
-			digitalWrite(ledSequence[i], HIGH);
-			delay(1000);
-			digitalWrite(ledSequence[i], LOW);
+			flashLED(ledSequence[i],500);
 		}
 		playerLost = getUserInput();
 	}
-	if (roundNum == maxArraySize)
+
+	if (level == maxArraySize)
 	{
 		Serial.println("You won!");
 	}
@@ -263,5 +247,6 @@ void loop()
 	}
 	for (;;)
 	{
+		displayScore(level - 1);
 	}
 }
