@@ -23,9 +23,9 @@ const int yellowButtonPin = PIN_A2;
 const int redLEDPin = 8;
 const int redButtonPin = PIN_A3;
 
-const int maxArraySize = 50;
+const int sequenceLength = 4;
+
 int level = 0;
-int ledSequence[maxArraySize];
 
 int piezoPin = 7;
 
@@ -170,32 +170,45 @@ void displayScore(int num)
 	delay(100);
 }
 
-void flashLED(int led, int onTime)
+void flash(int led, int onTime, int game)
 {
-	digitalWrite(led, HIGH);
-	tone(piezoPin,ledNotes[led-redLEDPin]);
-	delay(onTime);
-	noTone(piezoPin);
-	digitalWrite(led, LOW);
-	delay(50);
+	if (game == 1)
+	{
+		digitalWrite(led, HIGH);
+		tone(piezoPin, ledNotes[led - redLEDPin]);
+		delay(onTime);
+		noTone(piezoPin);
+		digitalWrite(led, LOW);
+		delay(50);
+	}
+	else
+	{
+	}
 }
 
 //generates random LED to turn on and adds it to existing sequence
-void addToSequence()
+void addToSequence(int ledSequence[])
 {
 	ledSequence[level] = random(redLEDPin, blueLEDPin + 1);
 	level++;
 }
 
-bool getUserInput()
+bool getUserInput(int ledSequence[], int sequenceLength, int game)
 {
 	int inputs = 0;
 	int buttonPressed;
 	int buttonToLED;
-	while (inputs < level)
+	int constPin;
+	if (game == 1) {
+		constPin = redLEDPin;
+	}
+	else {
+		constPin = 0xA;
+	}
+	while (inputs < sequenceLength)
 	{
 		buttonPressed = PINC & 0xF;
-		buttonToLED = log10(buttonPressed) / log10(2) + redLEDPin;
+		buttonToLED = log10(buttonPressed) / log10(2) + constPin;
 
 		if (buttonPressed == 0)
 		{
@@ -203,10 +216,9 @@ bool getUserInput()
 		}
 		if (ledSequence[inputs] != buttonToLED)
 		{
-			Serial.println("Loser!");
 			return true;
 		}
-		flashLED(buttonToLED,500);
+		flash(buttonToLED, 500, game);
 		inputs++;
 	}
 	Serial.println("Sequence Matched!");
@@ -214,39 +226,61 @@ bool getUserInput()
 	return false;
 }
 
-//MAIN
-void loop()
-{
-
-	// for(int i = 3; i >= 0; i--){
-	// 	tone(piezoPin,ledNotes[i],250);
-	// 	delay(250*1.3);
-	// 	noTone(piezoPin);
-	// }
-	//used to randomize sequence each game
-	randomSeed(analogRead(A4));
-	bool playerLost = false;
-
-	while (level < maxArraySize && !playerLost)
+void endGame(bool playerLost) {
+if (playerLost)
 	{
-		addToSequence();
-		for (int i = 0; i < level; i++)
-		{
-			flashLED(ledSequence[i],500);
-		}
-		playerLost = getUserInput();
-	}
-
-	if (level == maxArraySize)
-	{
-		Serial.println("You won!");
+		Serial.println("You lost!");
 	}
 	else
 	{
-		Serial.println("You lost!");
+		Serial.println("You won!");
 	}
 	for (;;)
 	{
 		displayScore(level - 1);
+	}
+}
+
+void playSimonGame(int game)
+{
+	const int maxArraySize = 50;
+	int ledSequence[maxArraySize];
+	bool playerLost = false;
+
+	while (level < maxArraySize && !playerLost)
+	{
+		addToSequence(ledSequence);
+		for (int i = 0; i < level; i++)
+		{
+			flash(ledSequence[i], 500, game);
+		}
+		playerLost = getUserInput(ledSequence, level, game);
+	}
+	endGame(playerLost);
+}
+
+//MAIN
+void loop()
+{
+	//used to randomize sequence each game
+	randomSeed(analogRead(A4));
+
+	//Picking which game:
+	int game;
+	int *ledSequence;
+	switch (game)
+	{
+	//Simon
+	case 1:
+		playSimonGame(game);
+		break;
+
+	//Speed Memory Game
+	case 2:
+		break;
+
+	//Hex to Binary Game
+	case 3:
+		break;
 	}
 }
