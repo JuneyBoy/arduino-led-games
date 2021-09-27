@@ -60,6 +60,9 @@ int getSegmentString(int num)
 	//case for display values 0-F
 	switch (num)
 	{
+	case -1:
+		returnString = B00000000;
+		break;
 	case 0:
 		returnString = B11111010;
 		break;
@@ -132,14 +135,14 @@ int getSegmentString(int num)
 	return returnString;
 }
 
-void displaySymbol(int segmentString)
+void displaySymbol(int segmentString, int onTime)
 {
 	digitalWrite(latchPin, LOW);
 	//shifts out the bits of segmentString to the register, starting with the most significant bit
 	shiftOut(dataPin, clockPin, MSBFIRST, segmentString);
 	//parallel data sent to 7-segment display
 	digitalWrite(latchPin, HIGH);
-	delayMicroseconds(100);
+	delay(onTime);
 }
 
 //displays score on the 7 segment display
@@ -162,28 +165,42 @@ void displayScore(int num)
 		displayScore(q);
 	}
 	//once q is not larger than 0, all the digits have been extracted and can now be displayed starting with the most significant digit
-	displaySymbol(getSegmentString(r));
+	displaySymbol(getSegmentString(r), 0.1);
 	//digit is displayed for 0.5 seconds
 	delay(500);
 	//display is cleared for 0.1 seconds before displaying subsequent digits or exiting function entirely
-	displaySymbol(0);
+	displaySymbol(getSegmentString(-1), 0.1);
 	delay(100);
 }
 
-void flash(int led, int onTime, int game)
+void flash(int thingToFlash, int onTime, int game)
 {
 	if (game == 1)
 	{
-		digitalWrite(led, HIGH);
-		tone(piezoPin, ledNotes[led - redLEDPin]);
+		digitalWrite(thingToFlash, HIGH);
+		tone(piezoPin, ledNotes[thingToFlash - redLEDPin]);
 		delay(onTime);
 		noTone(piezoPin);
-		digitalWrite(led, LOW);
+		digitalWrite(thingToFlash, LOW);
 		delay(50);
 	}
 	else
 	{
+		displaySymbol(getSegmentString(thingToFlash), onTime);
+		// tone(piezoPin, ledNotes[thingToFlash - 0xA]);
+		// delay(onTime);
+		// noTone(piezoPin);
+		displaySymbol(getSegmentString(-1), onTime);
 	}
+}
+
+void makeSequence(int symbolSequence[], int sequenceLength)
+{
+	for (int i = 0; i < sequenceLength; ++i)
+	{
+		symbolSequence[i] = random(0xA, 0xD + 1);
+	}
+	level++;
 }
 
 //generates random LED to turn on and adds it to existing sequence
@@ -193,41 +210,74 @@ void addToSequence(int ledSequence[])
 	level++;
 }
 
-bool getUserInput(int ledSequence[], int sequenceLength, int game)
+bool getUserInput(int sequence[], int sequenceLength, int game)
 {
 	int inputs = 0;
 	int buttonPressed;
 	int buttonToLED;
 	int constPin;
-	if (game == 1) {
-		constPin = redLEDPin;
-	}
-	else {
-		constPin = 0xA;
-	}
-	while (inputs < sequenceLength)
+	if (game == 1)
 	{
-		buttonPressed = PINC & 0xF;
-		buttonToLED = log10(buttonPressed) / log10(2) + constPin;
+		constPin = redLEDPin;
+		while (inputs < sequenceLength)
+		{
+			buttonPressed = PINC & 0xF;
+			buttonToLED = log10(buttonPressed) / log10(2) + constPin;
 
-		if (buttonPressed == 0)
-		{
-			continue;
+			if (buttonPressed == 0)
+			{
+				continue;
+			}
+			if (sequence[inputs] != buttonToLED)
+			{
+				return true;
+			}
+			flash(buttonToLED, 500, game);
+			inputs++;
 		}
-		if (ledSequence[inputs] != buttonToLED)
+	}
+	else
+	{
+		constPin = 0xA;
+		while (inputs < sequenceLength)
 		{
-			return true;
+			buttonPressed = PINC & 0xF;
+
+			switch(buttonPressed) {
+				case 0b1000: 
+					buttonToLED = 0xA;
+					break;
+				case 0b0100: 
+					buttonToLED = 0xB;
+					break;
+				case 0b0010: 
+					buttonToLED = 0xC;
+					break;
+				case 0b0001: 
+					buttonToLED = 0xD;
+					break;
+			}
+
+			if (buttonPressed == 0)
+			{
+				continue;
+			}
+			if (sequence[inputs] != buttonToLED)
+			{
+				return true;
+			}
+			flash(buttonToLED, 500, game);
+			inputs++;
 		}
-		flash(buttonToLED, 500, game);
-		inputs++;
 	}
 	Serial.println("Sequence Matched!");
 	delay(100);
 	return false;
 }
 
-void endGame(bool playerLost) {
-if (playerLost)
+void endGame(bool playerLost)
+{
+	if (playerLost)
 	{
 		Serial.println("You lost!");
 	}
@@ -259,15 +309,34 @@ void playSimonGame(int game)
 	endGame(playerLost);
 }
 
+void playSpeedMemoryGame(int game)
+{
+	const int sequenceLength = 4;
+	int symbolSequence[sequenceLength];
+	bool playerLost = false;
+	while (!playerLost)
+	{
+		makeSequence(symbolSequence, sequenceLength);
+		for (int i = 0; i < sequenceLength; ++i)
+		{
+			flash(symbolSequence[i], pow(0.75, level-1) * 1000, game);
+		}
+		playerLost = getUserInput(symbolSequence, sequenceLength, game);
+	}
+	endGame(playerLost);
+}
+
 //MAIN
 void loop()
 {
+
+	displaySymbol(getSegmentString(-1), 0.1);
 	//used to randomize sequence each game
 	randomSeed(analogRead(A4));
 
 	//Picking which game:
-	int game;
-	int *ledSequence;
+	int game = 2;
+	// int *ledSequence;
 	switch (game)
 	{
 	//Simon
@@ -277,6 +346,7 @@ void loop()
 
 	//Speed Memory Game
 	case 2:
+		playSpeedMemoryGame(game);
 		break;
 
 	//Hex to Binary Game
