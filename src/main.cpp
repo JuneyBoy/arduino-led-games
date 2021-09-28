@@ -2,6 +2,8 @@
 #include <math.h>
 #include <pitches.h>
 
+//Testing to make sure I will now properly show up as a contributor on github
+
 //p12 on 74HC595
 const int latchPin = 3;
 //p11 on 74HC595
